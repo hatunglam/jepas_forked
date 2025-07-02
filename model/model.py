@@ -119,10 +119,6 @@ class IJEPA(JEPA_base, pl.LightningModule):
         ) + start_index_w  # position in row
 
         return start_index
-    
-    ####################################################################################
-    def hello(a):
-        return a 
 
     @staticmethod
     def generate_target_patches(
