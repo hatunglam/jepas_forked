@@ -59,7 +59,7 @@ class IJEPA(JEPA_base, pl.LightningModule):
 
     @staticmethod
     def randomly_select_starting_patch_for_block(
-        patch_dim: Tuple[int, int],
+        patch_dim: Tuple[int, int], 
         block_dim: Tuple[int, int],
         seed: Optional[int] = None,
     ) -> int:
@@ -77,8 +77,8 @@ class IJEPA(JEPA_base, pl.LightningModule):
         NOTE:
         Patches are the basic (processing) units of the image (e.g. 16x16 pixels).
         Blocks are larger regions composed of multiple patches.
-        In training, the model attempts to understand blocks within an image - ie. context blocks - by processing it one patch at a time,
-        and uses this understanding is used to predict the structure and content of (the target blocks within) an image in a more abstract way.
+        In training, the model attempts to understand blocks within an image - ie. context blocks - tby processing it one patch at a time,
+        and uses this understanding is used to predict the structure and content of (the target blocks within) an image in a more abstrac way.
 
         Linear index coordinates are used to define the starting patch for a block,
         and map 2D pixel coordinates onto a 1D array index (flattened form).
@@ -96,7 +96,7 @@ class IJEPA(JEPA_base, pl.LightningModule):
             block_dim  # The number of patches in each dimension (width and height)
         )
 
-        max_start_index_h: int = num_patches_h - num_blocks_h + 1
+        max_start_index_h: int = num_patches_h - num_blocks_h + 1 # +1 because of the limit 
         max_start_index_w: int = num_patches_w - num_blocks_w + 1
         assert all(
             (
@@ -269,11 +269,13 @@ class IJEPA(JEPA_base, pl.LightningModule):
                 patch_start_position: int = start_patch + h * num_patches_w + w
                 context_patches_set.add(patch_start_position)
 
+        # Distinctive feature
         # Exclude the target patches
         context_patches: List[int] = list(
             context_patches_set.difference(target_patches_to_exclude)
         )
 
+        # Another way to generate
         h = torch.arange(num_blocks_h)
         w = torch.arange(num_blocks_w)
         hw_grid = torch.cartesian_prod(h, w)

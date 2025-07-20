@@ -166,6 +166,9 @@ class JEPA_base(VisionTransformer):
             target_masks: torch.Tensor = self.mask_token.repeat(
                 batch_dim, num_patches, 1
             )
+            # num_patches: number of patches in each Target block
+            # self.mask_token --> (1, 1, embed_dim)
+            # --> target_mask shape: (batch, n_patches_perblock, embed_dim)
 
             # The target tokens (initialised as `target_masks`) must contain positional information.
             # The `context_encoding` already contains positional encoding from `self.forward_vit()` pass,
@@ -175,6 +178,8 @@ class JEPA_base(VisionTransformer):
                 target_patches[target_block_idx],  # Include target patch only
                 :,  # Include all embed dim
             ]
+            # get the position of only the selected target mask only
+            
             target_masks = target_masks + target_pos_embedding
 
             # Generate prediction for the current target block
@@ -190,8 +195,8 @@ class JEPA_base(VisionTransformer):
     def forward_base(
         self,
         x: torch.Tensor,
-        target_patches: List[List[int]],
-        context_patches: List[int],
+        target_patches: List[List[int]],  # [ [id2, id2, ...], [id2, id2, ...], ...]
+        context_patches: List[int],   # [id1, id2, ...]
     ) -> Union[Tuple[torch.Tensor, torch.Tensor], torch.Tensor]:
         """
         (Image/video invariant)
@@ -263,7 +268,7 @@ class JEPA_base(VisionTransformer):
         )  # (batch_size, num_context_patches, embed_dim)
         batch_size, num_patches_enc, embed_dim = context_encoding.shape
         assert (
-            num_context_patches == num_patches_enc
+            num_context_patches == num_patches_enc  
         ), f"The number of patches in the context_block ({num_context_patches}) does not equal the number of patches in the context_encoding ({num_patches_enc})."
 
         ### Make predictions using the decoder
