@@ -3,6 +3,11 @@ from typing import Any, Dict
 
 from .load_config import load_config
 
+# def load_config(config_path: str = "./config.json") -> Dict[str, Any]:
+#     config_path = Path(config_path).resolve()
+#     with open(config_path, encoding="utf-8") as f:
+#         config: Dict[str, Any] = json.load(f)
+#      return config
 
 @lru_cache(maxsize=1)
 def get_config() -> Dict[str, Any]:

@@ -323,7 +323,7 @@ class IJEPA(JEPA_base, pl.LightningModule):
             x=x,  # (batch_size, channels, img_height, img_width)
             target_patches=target_patches,
             context_patches=context_patches,
-        )
+        )  # --> return (prediction_block, actual_target_block)
 
     def update_momentum(self, m: float) -> None:
         """
@@ -390,8 +390,8 @@ class IJEPA(JEPA_base, pl.LightningModule):
         )
 
         (
-            y_student,  # (num_target_blocks, batch_size, target_block_size, embed_dim)
-            y_teacher,  # (num_target_blocks, batch_size, target_block_size, embed_dim)
+            y_student,  # prediction: (num_target_blocks, batch_size, target_block_size, embed_dim) 
+            y_teacher,  # actual values: (num_target_blocks, batch_size, target_block_size, embed_dim)
         ) = self(
             x=batch,  # (batch_size, channels, img_height, img_width)
             target_aspect_ratio=target_aspect_ratio,
