@@ -8,8 +8,7 @@ import torch.nn as nn
 import transformers
 from transformers.models.bert.modeling_bert import BertEmbeddings
 
-from model.text import TextEncoder
-from model.vision.base_model import JEPA_base
+from base_model_rgbd import JEPA_base
 from utils.types import Number
 
 # pylint: disable=pointless-string-statement
@@ -172,7 +171,7 @@ class IDJEPA(JEPA_base, pl.LightningModule):
 
         # For each of the target blocks to generate
         for target_block_idx in range(num_target_blocks):
-            start_patch: int = IJEPA.randomly_select_starting_patch_for_block(
+            start_patch: int = IDJEPA.randomly_select_starting_patch_for_block(
                 patch_dim=patch_dim,
                 block_dim=block_dim,
                 seed=target_block_idx * seed if seed is not None else None,
@@ -256,7 +255,7 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         block_dim: Tuple[int, int] = num_blocks_h, num_blocks_w
 
         # Randomly select the starting patch for the context block
-        start_patch: int = IJEPA.randomly_select_starting_patch_for_block(
+        start_patch: int = IDJEPA.randomly_select_starting_patch_for_block(
             patch_dim=patch_dim,
             block_dim=block_dim,
             seed=seed,

@@ -7,12 +7,12 @@ import torch.nn as nn
 from ..utils.types import Number
 
 from predictor_rgbd import Predictor
-from .vit import VisionTransformer
+from vit_rgbd import RGBDVisionTransformer
 
 # pylint: disable=pointless-string-statement
 
 
-class JEPA_base(VisionTransformer):
+class JEPA_base(RGBDVisionTransformer):
     def __init__(
         self,
         decoder_depth: int,

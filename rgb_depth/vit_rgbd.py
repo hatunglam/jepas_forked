@@ -9,7 +9,7 @@ from utils.types import ensure_tuple
 from patch_embed import PatchEmbed2D, PatchEmbed3D
 
 
-class VisionTransformer(nn.Module):
+class RGBDVisionTransformer(nn.Module):
     def __init__(
         self,
         img_size: Union[int, Tuple[int, int]] = 224,
@@ -147,12 +147,14 @@ class VisionTransformer(nn.Module):
         return x_rgb, x_dep
 
 
-def vit_nano(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_nano(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=64,
         enc_depth=8,
         num_heads=8,
@@ -160,12 +162,14 @@ def vit_nano(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
     )
 
 
-def vit_tiny(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_tiny(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=192,
         enc_depth=12,
         num_heads=8,
@@ -173,12 +177,14 @@ def vit_tiny(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
     )
 
 
-def vit_small(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_small(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=384,
         enc_depth=18,
         num_heads=8,
@@ -186,12 +192,14 @@ def vit_small(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
     )
 
 
-def vit_base(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_base(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=768,
         enc_depth=18,
         num_heads=12,
@@ -199,12 +207,14 @@ def vit_base(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
     )
 
 
-def vit_large(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_large(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=1024,
         enc_depth=24,
         num_heads=16,
@@ -212,12 +222,14 @@ def vit_large(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
     )
 
 
-def vit_huge(img_size, patch_size=16, in_chans=3, num_frames=1, **kwargs):
-    return VisionTransformer(
+def vit_huge(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):
+    return RGBDVisionTransformer(
         img_size=img_size,
         patch_size=patch_size,
-        in_chans=in_chans,
         num_frames=num_frames,
+        tubelet_size=tubelet_size,
+        in_chans_rgb=3,
+        in_chans_dep=1,
         embed_dim=1280,
         enc_depth=32,
         num_heads=16,
