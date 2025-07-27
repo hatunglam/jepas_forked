@@ -123,6 +123,7 @@ class Predictor(nn.Module):
         x = self.predictor_embed(x)
 
         # Pass the concatenated tensor through the transformer decoder
+        print("decoding")
         x = self.decoder(x)  # (batch_size, predictor_embed_dim, embed_dim)
 
         # Normalise and project predictor ouputs back to the input dimension

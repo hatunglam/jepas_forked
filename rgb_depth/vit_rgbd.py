@@ -73,9 +73,11 @@ class RGBDVisionTransformer(nn.Module):
             )
         )
 
-        self.num_patches: int = int(
-            torch.prod(torch.Tensor(self.patch_embed_rgb.patch_shape)).item()
-        )
+        # self.num_patches: int = int(
+        #     torch.prod(torch.Tensor(self.patch_embed_rgb.patch_shape)).item()
+        # )
+
+        self.num_patches = self.patch_embed_rgb.patch_shape[0] * self.patch_embed_rgb.patch_shape[1]
 
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_patches, embed_dim))
 
@@ -106,45 +108,22 @@ class RGBDVisionTransformer(nn.Module):
         patch_embed_only: bool = False,
     ) -> torch.Tensor:
         
-        #-----------------RGB Image-----------------
-        # Obtain patch embeddings from the input tensor
-        x_rgb = self.patch_embed_rgb(x_rgb)  # (batch, num_patches, embed_dim)
-
-        # Add positional embeddings to the patch embeddings
-        x_rgb = x_rgb + self.pos_embedding  # (batch, num_patches, embed_dim)
-
-        # Normalize the patch embeddings (if `self.post_emb_norm`)
-        x_rgb = self.post_emb_norm_vit(x_rgb)  # (batch, num_patches, embed_dim)
-
-        if patch_embed_only:
-            return x_rgb  # (batch, num_patches, embed_dim)
-
-        # Encode the patch embeddings using the student encoder
-        x_rgb = self.encoder(x_rgb, attn_mask=attention_mask)  # (batch, num_patches, embed_dim)
-
-        # Normalize the encoded patches (if `self.post_enc_norm`)
-        x_rgb = self.post_enc_norm_vit(x_rgb)  # (batch, num_patches, embed_dim)
-
-        #-----------------Depth Image-----------------
-        # Obtain patch embeddings from the input tensor
-        x_dep = self.patch_embed_dep(x_dep)  # (batch, num_patches, embed_dim)
-
-        # Add positional embeddings to the patch embeddings
-        x_dep = x_dep + self.pos_embedding  # (batch, num_patches, embed_dim)
-
-        # Normalize the patch embeddings (if `self.post_emb_norm`)
-        x_dep = self.post_emb_norm_vit(x_dep)  # (batch, num_patches, embed_dim)
-
-        if patch_embed_only:
-            return x_dep  # (batch, num_patches, embed_dim)
-
-        # Encode the patch embeddings using the student encoder
-        x_dep = self.encoder(x_dep, attn_mask=attention_mask)  # (batch, num_patches, embed_dim)
-
-        # Normalize the encoded patches (if `self.post_enc_norm`)
-        x_dep = self.post_enc_norm_vit(x_dep)  # (batch, num_patches, embed_dim)
-
-        return x_rgb, x_dep
+        x_rgb = self.patch_embed_rgb(x_rgb)
+        x_rgb = x_rgb + self.pos_embedding
+        x_rgb = self.post_emb_norm_vit(x_rgb)
+        if x_dep is not None:
+            x_dep = self.patch_embed_dep(x_dep)
+            x_dep = x_dep + self.pos_embedding
+            x_dep = self.post_emb_norm_vit(x_dep)
+        if patch_embed_only: # Training
+            return x_rgb, x_dep
+        # Inference
+        x_rgb = self.encoder(x_rgb, attn_mask=attention_mask)
+        x_rgb = self.post_enc_norm_vit(x_rgb)
+        return x_rgb, None
+        
+        
+        
 
 
 def vit_nano(img_size, patch_size=16, num_frames=1, tubelet_size=2, **kwargs):

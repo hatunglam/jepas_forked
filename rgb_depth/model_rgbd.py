@@ -307,18 +307,24 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         all_unique_target_patches: Set[int]
 
         target_patches, all_unique_target_patches = IDJEPA.generate_target_patches(
-            patch_dim=self.patch_embed.patch_shape,  # The number of patches in each dimension
+            patch_dim=self.patch_embed_dep.patch_shape,  # The number of patches in each dimension
             aspect_ratio=target_aspect_ratio,
             scale=target_scale,
             num_target_blocks=self.num_target_blocks,
         )
 
+        print("Generate target patch")
+
         context_patches: List[int] = IDJEPA.generate_context_patches(
-            patch_dim=self.patch_embed.patch_shape,
+            patch_dim=self.patch_embed_rgb.patch_shape,
             aspect_ratio=context_aspect_ratio,
             scale=context_scale,
             target_patches_to_exclude=all_unique_target_patches,
         )
+
+        print("Generate context patch")
+
+        print("predicting ....")
 
         return self.forward_base(
             x_rgb= x_rgb,  # (batch_size, channels, img_height, img_width)
@@ -379,6 +385,7 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         torch.Tensor
             _description_
         """
+        x_rgb, x_dep = batch
         # Generate random target and context aspect ratio and scale
         target_aspect_ratio: float = np.random.uniform(
             self.target_aspect_ratio[0], self.target_aspect_ratio[1]
@@ -395,7 +402,8 @@ class IDJEPA(JEPA_base, pl.LightningModule):
             y_student,  # prediction: (num_target_blocks, batch_size, target_block_size, embed_dim) 
             y_teacher,  # actual values: (num_target_blocks, batch_size, target_block_size, embed_dim)
         ) = self(
-            x=batch,  # (batch_size, channels, img_height, img_width)
+            x_rgb=x_rgb,
+            x_dep=x_dep,  # (batch_size, channels, img_height, img_width)
             target_aspect_ratio=target_aspect_ratio,
             target_scale=target_scale,
             context_aspect_ratio=self.context_aspect_ratio,
@@ -428,6 +436,8 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         torch.Tensor
             The aggregated loss for the batch.
         """
+        x_rgb, x_dep = batch
+
         # Generate random target and context aspect ratio and scale
         target_aspect_ratio: float = np.random.uniform(
             self.target_aspect_ratio[0], self.target_aspect_ratio[1]
@@ -444,7 +454,8 @@ class IDJEPA(JEPA_base, pl.LightningModule):
             y_student,  # (num_target_blocks, batch_size, target_block_size, embed_dim)
             y_teacher,  # (num_target_blocks, batch_size, target_block_size, embed_dim)
         ) = self(
-            x=batch,
+            x_rgb=x_rgb,
+            x_dep=x_dep,
             target_aspect_ratio=target_aspect_ratio,
             target_scale=target_scale,
             context_aspect_ratio=self.context_aspect_ratio,
@@ -468,7 +479,7 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         Parameters
         ----------
         batch : torch.Tensor
-            _description_
+            _description_u
         batch_idx : int
             _description_
         dataloader_idx : int
@@ -479,6 +490,8 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         torch.Tensor
             _description_
         """
+        x_rgb, x_dep = batch
+
         # Generate random target and context aspect ratio
         target_aspect_ratio: float = np.random.uniform(
             self.target_aspect_ratio[0], self.target_aspect_ratio[1]
@@ -490,7 +503,8 @@ class IDJEPA(JEPA_base, pl.LightningModule):
         self.mode = "test"
 
         return self(  # Return only student embedding using the student (ViT) encoder
-            x=batch,
+            x_rgb=x_rgb,
+            x_dep=x_dep,
             target_aspect_ratio=target_aspect_ratio,
             target_scale=target_scale,
             context_aspect_ratio=self.context_aspect_ratio,

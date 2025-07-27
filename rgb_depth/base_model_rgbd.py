@@ -4,7 +4,7 @@ from typing import Any, List, Literal, Optional, Set, Tuple, Union
 import torch
 import torch.nn as nn
 
-from ..utils.types import Number
+from utils.types import Number
 
 from predictor_rgbd import Predictor
 from vit_rgbd import RGBDVisionTransformer
@@ -26,7 +26,7 @@ class JEPA_base(RGBDVisionTransformer):
 
         self.mask_token = nn.Parameter(torch.randn(1, 1, self.embed_dim))
         nn.init.trunc_normal_(self.mask_token, 0.02)
-
+    
         self.post_enc_norm_jepa = (
             nn.LayerNorm(self.embed_dim) if self.post_enc_norm else nn.Identity()
         )
@@ -89,7 +89,7 @@ class JEPA_base(RGBDVisionTransformer):
             target_blocks_list, dim=0
         )  # (num_target_blocks, batch_size, target_block_size, embed_dim)
 
-        return target_block.cuda()
+        return target_block
 
     def get_context_block(
         self,
@@ -151,7 +151,7 @@ class JEPA_base(RGBDVisionTransformer):
         # Initialize tensor to hold prediction blocks
         prediction_blocks = torch.zeros(
             (num_target_blocks, batch_dim, num_patches, embed_dim)
-        ).cuda()
+        ) 
 
         # Predict each target block separately using the context encoding and mask tokens
         for target_block_idx in range(num_target_blocks):
@@ -227,26 +227,26 @@ class JEPA_base(RGBDVisionTransformer):
         thus, `self.forward_vit()` need only patch embed - target and context blocks will
         be extracted and encoded using the teacher and student encoders respectively.
         """
-
         # -------------------------------------------------------------------------------------------
+        
+        print("run VIT for both inputs")
         # NOTE: Positional encoding applied to `x` during `self.forward_vit()`
         x_rgb, x_dep = self.forward_vit(
             x_rgb=x_rgb,
-            x_dep=x_dep,
-            patch_embed_only=not test_mode,
+            x_dep=None if test_mode else x_dep,
+            patch_embed_only=not test_mode, # True when in Training mode -> return 
         )
 
         batch_size, num_patches, embed_dim = (  # pylint: disable=unused-variable
             x_rgb.shape
         )  # where num_patches = (output_height * output_width) if not self.is_video else (output_t * output_height * output_width)
-
         # If in test mode, return the full embedding using the student encoder
         if test_mode:
             return x_rgb, x_dep  # (batch_size, num_patches, embed_dim)
         
         # -------------------------------------------------------------------------------------------
 
-        ### Get target embeddings using the target encoder
+        # Get target embeddings using the target encoder
         target_blocks: torch.Tensor = (
             self.get_target_blocks(  # NOTE: `target_blocks` contain positional information from `x`, which underwent the `self.forward_vit()` pass
                 x= x_dep,
@@ -278,7 +278,7 @@ class JEPA_base(RGBDVisionTransformer):
             num_context_patches == num_patches_enc  
         ), f"The number of patches in the context_block ({num_context_patches}) does not equal the number of patches in the context_encoding ({num_patches_enc})."
 
-        ### Make predictions using the decoder
+        # Make predictions using the decoder
         prediction_blocks = self.make_predictions(
             num_target_blocks=num_target_blocks,
             batch_dim=batch_size,
